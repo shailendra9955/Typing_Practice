@@ -16,24 +16,33 @@
       --paper: #ffffff;
       --ink: #1c2430;
       --muted: #707a89;
+
       --primary: #1769e0;
       --primary-dark: #0d55bc;
       --danger: #d83a4d;
+      --restart: #f5364c;
+      --restart-dark: #e51f36;
+
       --border: #dbe2ec;
-      --shadow: 0 12px 34px rgba(24, 42, 72, 0.13);
       --line-color: #e6ebf3;
+
       --card-bg: #ffffff;
       --card-content-bg: #ffffff;
       --secondary-bg: #ffffff;
       --secondary-hover: #f4f7fb;
       --stat-bg: #f8faff;
+
       --info-bg: #f0f4fa;
       --info-text: #526175;
+
       --success-bg: #edf7f0;
       --success-text: #277744;
+
       --error-bg: #fff3f4;
       --error-text: #4a252b;
+
       --modal-overlay: rgba(16, 28, 47, 0.62);
+      --shadow: 0 12px 34px rgba(24, 42, 72, 0.13);
       --line-height: 1.9rem;
     }
 
@@ -71,6 +80,8 @@
       transform: scale(0.98);
     }
 
+    /* Main Page */
+
     .app {
       width: min(100%, 960px);
       min-height: 100dvh;
@@ -80,8 +91,6 @@
       flex-direction: column;
       gap: 14px;
     }
-
-    /* Header */
 
     .topbar {
       display: flex;
@@ -164,7 +173,7 @@
     .toggle input:checked + .slider::before {
       content: "☾";
       transform: translateX(24px);
-      color: #42526a;
+      color: #314154;
     }
 
     .toggle input:focus-visible + .slider {
@@ -172,7 +181,7 @@
       outline-offset: 3px;
     }
 
-    /* Typing Area */
+    /* Typing Paper */
 
     .typing-paper {
       position: relative;
@@ -248,7 +257,7 @@
       display: block;
     }
 
-    /* Main Action Buttons */
+    /* Main Buttons */
 
     .bottom-actions {
       display: flex;
@@ -277,17 +286,18 @@
     }
 
     .restart-button {
-      background: #f5364c;
+      background: var(--restart);
       color: #ffffff;
     }
 
     .restart-button:hover {
-      background: #e51f36;
+      background: var(--restart-dark);
     }
 
-    /* Result Modal */
+    /* Shared Popup Styles */
 
-    .modal-backdrop {
+    .modal-backdrop,
+    .welcome-backdrop {
       position: fixed;
       z-index: 10;
       inset: 0;
@@ -298,9 +308,28 @@
       background: var(--modal-overlay);
     }
 
-    .modal-backdrop.show {
+    .modal-backdrop.show,
+    .welcome-backdrop.show {
       display: flex;
     }
+
+    .welcome-backdrop {
+      z-index: 20;
+    }
+
+    @keyframes popup {
+      from {
+        transform: translateY(14px) scale(0.98);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Result Popup */
 
     .result-card {
       display: flex;
@@ -314,18 +343,6 @@
       color: var(--ink);
       box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
       animation: popup 180ms ease-out;
-    }
-
-    @keyframes popup {
-      from {
-        transform: translateY(14px) scale(0.98);
-        opacity: 0;
-      }
-
-      to {
-        transform: translateY(0) scale(1);
-        opacity: 1;
-      }
     }
 
     .result-header {
@@ -343,10 +360,12 @@
       font-size: 1.05rem;
     }
 
-    .icon-close {
+    .icon-close,
+    .welcome-close {
       display: grid;
       width: 36px;
       height: 36px;
+      flex-shrink: 0;
       place-items: center;
       border-radius: 50%;
       background: var(--secondary-bg);
@@ -355,7 +374,8 @@
       line-height: 1;
     }
 
-    .icon-close:hover {
+    .icon-close:hover,
+    .welcome-close:hover {
       background: var(--secondary-hover);
     }
 
@@ -487,6 +507,141 @@
       background: var(--secondary-hover);
     }
 
+    /* Welcome Popup */
+
+    .welcome-card {
+      display: flex;
+      flex-direction: column;
+      width: min(92vw, 460px);
+      max-height: calc(100dvh - 24px);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--card-bg);
+      color: var(--ink);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
+      animation: popup 180ms ease-out;
+    }
+
+    .welcome-header {
+      display: flex;
+      flex-shrink: 0;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card-bg);
+    }
+
+    .welcome-label {
+      margin: 0 0 4px;
+      color: var(--primary);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .welcome-header h2 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+
+    .welcome-content {
+      min-height: 0;
+      overflow-y: auto;
+      padding: 16px 18px;
+      background: var(--card-content-bg);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .welcome-intro {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .instruction-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .instruction-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+    }
+
+    .instruction-number {
+      display: grid;
+      width: 26px;
+      height: 26px;
+      flex-shrink: 0;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .instruction-item h3 {
+      margin: 1px 0 3px;
+      color: var(--ink);
+      font-size: 0.92rem;
+    }
+
+    .instruction-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.4;
+    }
+
+    .welcome-tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin-top: 16px;
+      padding: 11px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--stat-bg);
+    }
+
+    .welcome-tip span {
+      font-size: 1rem;
+    }
+
+    .welcome-tip p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+
+    .welcome-actions {
+      padding: 12px 18px 18px;
+      border-top: 1px solid var(--border);
+      background: var(--card-bg);
+    }
+
+    .start-typing-button {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .start-typing-button:hover {
+      background: var(--primary-dark);
+    }
+
     /* Dark Theme */
 
     body.dark-theme {
@@ -494,11 +649,14 @@
       --paper: #18212c;
       --ink: #edf3fa;
       --muted: #a9b6c5;
+
       --primary: #66a2ff;
       --primary-dark: #3f82e7;
       --danger: #ff7180;
+      --restart: #d9465b;
+      --restart-dark: #c93249;
+
       --border: #354557;
-      --shadow: 0 12px 34px rgba(0, 0, 0, 0.4);
       --line-color: #304052;
 
       --card-bg: #18212c;
@@ -516,26 +674,15 @@
       --error-bg: #4a2a32;
       --error-text: #ffe2e5;
 
-      --modal-overlay: rgba(3, 8, 14, 0.76);
+      --modal-overlay: rgba(3, 8, 14, 0.78);
+      --shadow: 0 12px 34px rgba(0, 0, 0, 0.4);
     }
 
     body.dark-theme #typingArea::placeholder {
       color: #91a0b2;
     }
 
-    body.dark-theme .restart-button {
-      background: #d9465b;
-    }
-
-    body.dark-theme .restart-button:hover {
-      background: #c93249;
-    }
-
-    body.dark-theme .toggle input:checked + .slider::before {
-      color: #263546;
-    }
-
-    /* Small Android Screens */
+    /* Mobile Layout */
 
     @media (max-width: 480px) {
       :root {
@@ -579,15 +726,16 @@
       .restart-button {
         min-height: 50px;
         padding: 10px 8px;
-        font-size: 0.88rem;
+        font-size: 0.86rem;
       }
 
-      .modal-backdrop {
-        align-items: center;
+      .modal-backdrop,
+      .welcome-backdrop {
         padding: 10px;
       }
 
-      .result-card {
+      .result-card,
+      .welcome-card {
         width: min(94vw, 390px);
         max-height: calc(100dvh - 20px);
         border-radius: 14px;
@@ -617,10 +765,6 @@
         font-size: 1rem;
       }
 
-      .analysis-section {
-        margin-top: 14px;
-      }
-
       .result-actions {
         gap: 8px;
         padding: 9px 12px 12px;
@@ -630,7 +774,41 @@
       .secondary-button {
         min-height: 44px;
         padding: 9px 8px;
-        font-size: 0.86rem;
+        font-size: 0.84rem;
+      }
+
+      .welcome-header {
+        padding: 14px 14px 11px;
+      }
+
+      .welcome-header h2 {
+        font-size: 1.15rem;
+      }
+
+      .welcome-content {
+        padding: 13px 14px;
+      }
+
+      .welcome-actions {
+        padding: 10px 14px 14px;
+      }
+
+      .welcome-intro {
+        margin-bottom: 13px;
+        font-size: 0.88rem;
+      }
+
+      .instruction-list {
+        gap: 10px;
+      }
+
+      .instruction-item h3 {
+        font-size: 0.88rem;
+      }
+
+      .instruction-item p,
+      .welcome-tip p {
+        font-size: 0.8rem;
       }
     }
   </style>
@@ -681,6 +859,8 @@
       </button>
     </div>
   </main>
+
+  <!-- Typing Result Popup -->
 
   <div
     class="modal-backdrop"
@@ -751,6 +931,95 @@
     </section>
   </div>
 
+  <!-- Welcome / How To Use Popup -->
+
+  <div
+    class="welcome-backdrop show"
+    id="welcomeModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="welcomeTitle"
+  >
+    <section class="welcome-card">
+      <header class="welcome-header">
+        <div>
+          <p class="welcome-label">WELCOME TO</p>
+          <h2 id="welcomeTitle">Typing Space</h2>
+        </div>
+
+        <button
+          class="welcome-close"
+          id="welcomeCloseButton"
+          type="button"
+          aria-label="Close instructions"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="welcome-content">
+        <p class="welcome-intro">
+          Practice your English typing speed, check your writing, and view your typing result.
+        </p>
+
+        <div class="instruction-list">
+          <div class="instruction-item">
+            <span class="instruction-number">1</span>
+            <div>
+              <h3>Start typing</h3>
+              <p>Tap inside the paper area and begin typing your English text.</p>
+            </div>
+          </div>
+
+          <div class="instruction-item">
+            <span class="instruction-number">2</span>
+            <div>
+              <h3>Timer starts automatically</h3>
+              <p>The timer begins when you type your first character.</p>
+            </div>
+          </div>
+
+          <div class="instruction-item">
+            <span class="instruction-number">3</span>
+            <div>
+              <h3>Finish your practice</h3>
+              <p>Click Finish Typing when you have completed your practice.</p>
+            </div>
+          </div>
+
+          <div class="instruction-item">
+            <span class="instruction-number">4</span>
+            <div>
+              <h3>View typing result</h3>
+              <p>See WPM, total words, characters, time taken, and writing suggestions.</p>
+            </div>
+          </div>
+
+          <div class="instruction-item">
+            <span class="instruction-number">5</span>
+            <div>
+              <h3>Restart any time</h3>
+              <p>Use Re-Start Typing to clear the written text and start again.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="welcome-tip">
+          <span>💡</span>
+          <p>
+            Grammar and spelling suggestions require an internet connection after finishing.
+          </p>
+        </div>
+      </div>
+
+      <footer class="welcome-actions">
+        <button class="start-typing-button" id="startTypingButton" type="button">
+          Start Typing
+        </button>
+      </footer>
+    </section>
+  </div>
+
   <script>
     const typingArea = document.getElementById("typingArea");
     const typingPaper = document.querySelector(".typing-paper");
@@ -773,6 +1042,10 @@
     const analysisResult = document.getElementById("analysisResult");
 
     const themeToggle = document.getElementById("themeToggle");
+
+    const welcomeModal = document.getElementById("welcomeModal");
+    const startTypingButton = document.getElementById("startTypingButton");
+    const welcomeCloseButton = document.getElementById("welcomeCloseButton");
 
     let startedAt = null;
     let elapsedSeconds = 0;
@@ -805,6 +1078,7 @@
       }
 
       startedAt = Date.now();
+
       updateTimer();
 
       timerInterval = setInterval(updateTimer, 1000);
@@ -855,6 +1129,7 @@
 
       typingArea.value = "";
       typingArea.disabled = false;
+
       timerElement.textContent = "00:00";
 
       clearTypingError();
@@ -868,6 +1143,14 @@
 
     function closePractice() {
       restartTyping();
+    }
+
+    function closeWelcomeModal() {
+      welcomeModal.classList.remove("show");
+
+      setTimeout(() => {
+        typingArea.focus();
+      }, 100);
     }
 
     function finishPractice() {
@@ -1009,6 +1292,7 @@
       const isDarkTheme = theme === "dark";
 
       document.body.classList.toggle("dark-theme", isDarkTheme);
+
       themeToggle.checked = isDarkTheme;
 
       localStorage.setItem("typespace-theme", theme);
@@ -1035,10 +1319,18 @@
     });
 
     finishButton.addEventListener("click", finishPractice);
+
     restartButton.addEventListener("click", restartTyping);
+
     tryAgainButton.addEventListener("click", restartTyping);
+
     modalCloseButton.addEventListener("click", closePractice);
+
     closePracticeButton.addEventListener("click", closePractice);
+
+    startTypingButton.addEventListener("click", closeWelcomeModal);
+
+    welcomeCloseButton.addEventListener("click", closeWelcomeModal);
 
     resultModal.addEventListener("click", (event) => {
       if (event.target === resultModal) {
@@ -1046,8 +1338,23 @@
       }
     });
 
+    welcomeModal.addEventListener("click", (event) => {
+      if (event.target === welcomeModal) {
+        closeWelcomeModal();
+      }
+    });
+
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && resultModal.classList.contains("show")) {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      if (welcomeModal.classList.contains("show")) {
+        closeWelcomeModal();
+        return;
+      }
+
+      if (resultModal.classList.contains("show")) {
         closePractice();
       }
     });
