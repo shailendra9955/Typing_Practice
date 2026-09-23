@@ -8,7 +8,7 @@
     content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
   />
 
-  <title>Typing Space — Typing Practice</title>
+  <title>Typing Space</title>
 
   <style>
     :root {
@@ -41,7 +41,7 @@
       --error-bg: #fff3f4;
       --error-text: #4a252b;
 
-      --modal-overlay: rgba(16, 28, 47, 0.62);
+      --modal-overlay: rgba(16, 28, 47, 0.64);
       --shadow: 0 12px 34px rgba(24, 42, 72, 0.13);
       --line-height: 1.9rem;
     }
@@ -60,12 +60,18 @@
       overflow-x: hidden;
       background: var(--bg);
       color: var(--ink);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family:
+        "Noto Sans Devanagari",
+        "Nirmala UI",
+        "Mangal",
+        Arial,
+        sans-serif;
       -webkit-tap-highlight-color: transparent;
       transition: background 0.25s ease, color 0.25s ease;
     }
 
     button,
+    select,
     textarea {
       font: inherit;
     }
@@ -80,8 +86,6 @@
       transform: scale(0.98);
     }
 
-    /* Main Page */
-
     .app {
       width: min(100%, 960px);
       min-height: 100dvh;
@@ -91,6 +95,8 @@
       flex-direction: column;
       gap: 14px;
     }
+
+    /* Header */
 
     .topbar {
       display: flex;
@@ -110,17 +116,37 @@
     .topbar-right {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+    }
+
+    .language-select {
+      max-width: 115px;
+      min-height: 38px;
+      padding: 7px 26px 7px 9px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: none;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .language-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.15);
     }
 
     .timer-box {
-      min-width: 84px;
-      padding: 8px 12px;
+      min-width: 76px;
+      padding: 8px 10px;
       border: 1px solid var(--border);
       border-radius: 10px;
       background: var(--paper);
       color: var(--primary);
       text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 0.9rem;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
     }
@@ -130,7 +156,7 @@
     .toggle {
       position: relative;
       display: inline-block;
-      width: 52px;
+      width: 50px;
       height: 28px;
       flex-shrink: 0;
     }
@@ -172,16 +198,11 @@
 
     .toggle input:checked + .slider::before {
       content: "☾";
-      transform: translateX(24px);
+      transform: translateX(22px);
       color: #314154;
     }
 
-    .toggle input:focus-visible + .slider {
-      outline: 3px solid rgba(23, 105, 224, 0.35);
-      outline-offset: 3px;
-    }
-
-    /* Typing Paper */
+    /* Typing Area */
 
     .typing-paper {
       position: relative;
@@ -229,7 +250,7 @@
       border-radius: 14px;
       background: transparent;
       color: var(--ink);
-      font-size: 1.05rem;
+      font-size: 1.08rem;
       line-height: var(--line-height);
       letter-spacing: 0.1px;
       caret-color: var(--primary);
@@ -294,10 +315,11 @@
       background: var(--restart-dark);
     }
 
-    /* Shared Popup Styles */
+    /* Popup Base */
 
     .modal-backdrop,
-    .welcome-backdrop {
+    .welcome-backdrop,
+    .language-backdrop {
       position: fixed;
       z-index: 10;
       inset: 0;
@@ -309,8 +331,13 @@
     }
 
     .modal-backdrop.show,
-    .welcome-backdrop.show {
+    .welcome-backdrop.show,
+    .language-backdrop.show {
       display: flex;
+    }
+
+    .language-backdrop {
+      z-index: 30;
     }
 
     .welcome-backdrop {
@@ -329,9 +356,9 @@
       }
     }
 
-    /* Result Popup */
-
-    .result-card {
+    .result-card,
+    .welcome-card,
+    .language-card {
       display: flex;
       flex-direction: column;
       width: min(92vw, 460px);
@@ -345,19 +372,26 @@
       animation: popup 180ms ease-out;
     }
 
-    .result-header {
+    /* Result Popup */
+
+    .result-header,
+    .welcome-header,
+    .language-header {
       display: flex;
       flex-shrink: 0;
       align-items: center;
       justify-content: space-between;
+      gap: 14px;
       padding: 14px 14px 10px;
       border-bottom: 1px solid var(--border);
       background: var(--card-bg);
     }
 
-    .result-header h2 {
+    .result-header h2,
+    .welcome-header h2,
+    .language-header h2 {
       margin: 0;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
     }
 
     .icon-close,
@@ -379,7 +413,9 @@
       background: var(--secondary-hover);
     }
 
-    .result-content {
+    .result-content,
+    .welcome-content,
+    .language-content {
       min-height: 0;
       overflow-y: auto;
       padding: 14px;
@@ -407,10 +443,11 @@
       font-size: 0.68rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.45px;
+      letter-spacing: 0.4px;
     }
 
     .stat-value {
+      font-family: Arial, sans-serif;
       font-size: 1.05rem;
       font-weight: 700;
     }
@@ -461,7 +498,7 @@
       background: var(--error-bg);
       color: var(--error-text);
       font-size: 0.87rem;
-      line-height: 1.4;
+      line-height: 1.45;
       overflow-wrap: anywhere;
     }
 
@@ -469,7 +506,8 @@
       color: var(--danger);
     }
 
-    .result-actions {
+    .result-actions,
+    .welcome-actions {
       display: grid;
       flex-shrink: 0;
       grid-template-columns: 1fr 1fr;
@@ -480,7 +518,8 @@
     }
 
     .primary-button,
-    .secondary-button {
+    .secondary-button,
+    .start-typing-button {
       min-height: 46px;
       padding: 10px 12px;
       border-radius: 10px;
@@ -488,12 +527,14 @@
       font-weight: 700;
     }
 
-    .primary-button {
+    .primary-button,
+    .start-typing-button {
       background: var(--primary);
       color: #ffffff;
     }
 
-    .primary-button:hover {
+    .primary-button:hover,
+    .start-typing-button:hover {
       background: var(--primary-dark);
     }
 
@@ -507,31 +548,89 @@
       background: var(--secondary-hover);
     }
 
+    /* Language Selection Popup */
+
+    .language-card {
+      width: min(92vw, 420px);
+    }
+
+    .language-header {
+      justify-content: center;
+      padding: 20px 18px 14px;
+      text-align: center;
+    }
+
+    .language-header h2 {
+      font-size: 1.2rem;
+    }
+
+    .language-content {
+      padding: 18px;
+    }
+
+    .language-subtitle {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .language-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .language-option {
+      min-height: 140px;
+      padding: 16px 10px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--stat-bg);
+      color: var(--ink);
+      text-align: center;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .language-option:hover {
+      border-color: var(--primary);
+      background: var(--secondary-hover);
+    }
+
+    .language-icon {
+      display: grid;
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 10px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .language-option strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 1rem;
+    }
+
+    .language-option small {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
     /* Welcome Popup */
 
     .welcome-card {
-      display: flex;
-      flex-direction: column;
-      width: min(92vw, 460px);
-      max-height: calc(100dvh - 24px);
-      overflow: hidden;
-      border: 1px solid var(--border);
       border-radius: 18px;
-      background: var(--card-bg);
-      color: var(--ink);
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
-      animation: popup 180ms ease-out;
     }
 
     .welcome-header {
-      display: flex;
-      flex-shrink: 0;
       align-items: flex-start;
-      justify-content: space-between;
-      gap: 14px;
       padding: 18px 18px 14px;
-      border-bottom: 1px solid var(--border);
-      background: var(--card-bg);
     }
 
     .welcome-label {
@@ -543,16 +642,11 @@
     }
 
     .welcome-header h2 {
-      margin: 0;
-      font-size: 1.3rem;
+      font-size: 1.28rem;
     }
 
     .welcome-content {
-      min-height: 0;
-      overflow-y: auto;
       padding: 16px 18px;
-      background: var(--card-content-bg);
-      -webkit-overflow-scrolling: touch;
     }
 
     .welcome-intro {
@@ -582,6 +676,7 @@
       border-radius: 50%;
       background: var(--primary);
       color: #ffffff;
+      font-family: Arial, sans-serif;
       font-size: 0.78rem;
       font-weight: 700;
     }
@@ -596,7 +691,7 @@
       margin: 0;
       color: var(--muted);
       font-size: 0.84rem;
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     .welcome-tip {
@@ -622,27 +717,15 @@
     }
 
     .welcome-actions {
+      grid-template-columns: 1fr;
       padding: 12px 18px 18px;
-      border-top: 1px solid var(--border);
-      background: var(--card-bg);
     }
 
     .start-typing-button {
       width: 100%;
-      min-height: 48px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      background: var(--primary);
-      color: #ffffff;
-      font-size: 0.95rem;
-      font-weight: 700;
     }
 
-    .start-typing-button:hover {
-      background: var(--primary-dark);
-    }
-
-    /* Dark Theme */
+    /* Dark Mode */
 
     body.dark-theme {
       --bg: #101720;
@@ -686,7 +769,7 @@
 
     @media (max-width: 480px) {
       :root {
-        --line-height: 1.8rem;
+        --line-height: 1.85rem;
       }
 
       .app {
@@ -695,27 +778,38 @@
       }
 
       .brand {
-        font-size: 1rem;
+        font-size: 0.95rem;
       }
 
       .topbar-right {
-        gap: 8px;
+        gap: 6px;
+      }
+
+      .language-select {
+        max-width: 88px;
+        min-height: 36px;
+        padding: 6px;
+        font-size: 0.72rem;
       }
 
       .timer-box {
-        min-width: 72px;
-        padding: 7px 9px;
-        font-size: 0.9rem;
+        min-width: 64px;
+        padding: 7px 6px;
+        font-size: 0.82rem;
       }
 
-      .typing-paper {
-        border-radius: 12px;
+      .toggle {
+        width: 46px;
+      }
+
+      .toggle input:checked + .slider::before {
+        transform: translateX(18px);
       }
 
       #typingArea {
         min-height: calc(100dvh - 165px);
         padding: 14px 14px 20px;
-        font-size: 1rem;
+        font-size: 1.02rem;
       }
 
       .bottom-actions {
@@ -725,64 +819,55 @@
       .finish-button,
       .restart-button {
         min-height: 50px;
-        padding: 10px 8px;
-        font-size: 0.86rem;
+        padding: 10px 7px;
+        font-size: 0.82rem;
       }
 
       .modal-backdrop,
-      .welcome-backdrop {
+      .welcome-backdrop,
+      .language-backdrop {
         padding: 10px;
       }
 
       .result-card,
-      .welcome-card {
+      .welcome-card,
+      .language-card {
         width: min(94vw, 390px);
         max-height: calc(100dvh - 20px);
         border-radius: 14px;
       }
 
-      .result-header {
+      .result-header,
+      .welcome-header {
         padding: 12px 12px 9px;
-      }
-
-      .result-header h2 {
-        font-size: 1rem;
       }
 
       .result-content {
         padding: 12px;
       }
 
-      .stats-grid {
-        gap: 8px;
-      }
-
-      .stat {
-        padding: 9px;
-      }
-
-      .stat-value {
-        font-size: 1rem;
-      }
-
       .result-actions {
-        gap: 8px;
         padding: 9px 12px 12px;
       }
 
       .primary-button,
       .secondary-button {
         min-height: 44px;
-        padding: 9px 8px;
-        font-size: 0.84rem;
+        padding: 9px 7px;
+        font-size: 0.8rem;
       }
 
-      .welcome-header {
-        padding: 14px 14px 11px;
+      .language-content {
+        padding: 14px;
       }
 
-      .welcome-header h2 {
-        font-size: 1.15rem;
+      .language-options {
+        gap: 10px;
+      }
+
+      .language-option {
+        min-height: 125px;
+        padding: 13px 7px;
       }
 
       .welcome-content {
@@ -794,7 +879,6 @@
       }
 
       .welcome-intro {
-        margin-bottom: 13px;
         font-size: 0.88rem;
       }
 
@@ -803,12 +887,12 @@
       }
 
       .instruction-item h3 {
-        font-size: 0.88rem;
+        font-size: 0.87rem;
       }
 
       .instruction-item p,
       .welcome-tip p {
-        font-size: 0.8rem;
+        font-size: 0.79rem;
       }
     }
   </style>
@@ -817,9 +901,18 @@
 <body>
   <main class="app">
     <header class="topbar">
-      <h1 class="brand">Typing Space</h1>
+      <h1 class="brand" id="appTitle">Typing Space</h1>
 
       <div class="topbar-right">
+        <select
+          class="language-select"
+          id="languageSelect"
+          aria-label="Select typing language"
+        >
+          <option value="en">English</option>
+          <option value="hi">हिंदी</option>
+        </select>
+
         <label class="toggle" aria-label="Toggle light and dark mode">
           <input type="checkbox" id="themeToggle" />
           <span class="slider"></span>
@@ -834,6 +927,7 @@
     <section class="typing-paper" aria-label="Typing practice paper">
       <textarea
         id="typingArea"
+        lang="en"
         aria-label="Typing area"
         placeholder="Start typing here..."
         spellcheck="true"
@@ -860,7 +954,7 @@
     </div>
   </main>
 
-  <!-- Typing Result Popup -->
+  <!-- Result Popup -->
 
   <div
     class="modal-backdrop"
@@ -886,30 +980,30 @@
       <div class="result-content">
         <div class="stats-grid">
           <div class="stat">
-            <span class="stat-label">Speed</span>
+            <span class="stat-label" id="speedLabel">Speed</span>
             <span class="stat-value" id="wpmResult">0 WPM</span>
           </div>
 
           <div class="stat">
-            <span class="stat-label">Time Taken</span>
+            <span class="stat-label" id="timeLabel">Time Taken</span>
             <span class="stat-value" id="timeResult">00:00</span>
           </div>
 
           <div class="stat">
-            <span class="stat-label">Total Words</span>
+            <span class="stat-label" id="wordsLabel">Total Words</span>
             <span class="stat-value" id="wordsResult">0</span>
           </div>
 
           <div class="stat">
-            <span class="stat-label">Characters</span>
+            <span class="stat-label" id="charactersLabel">Characters</span>
             <span class="stat-value" id="charactersResult">0</span>
           </div>
         </div>
 
         <section class="analysis-section">
-          <h3>English Writing Check</h3>
+          <h3 id="writingCheckTitle">Writing Check</h3>
 
-          <p class="analysis-note">
+          <p class="analysis-note" id="writingCheckNote">
             Spelling and grammar suggestions are checked after you finish typing.
           </p>
 
@@ -931,10 +1025,46 @@
     </section>
   </div>
 
-  <!-- Welcome / How To Use Popup -->
+  <!-- Language Selection Popup -->
 
   <div
-    class="welcome-backdrop show"
+    class="language-backdrop show"
+    id="languageModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="languageTitle"
+  >
+    <section class="language-card">
+      <header class="language-header">
+        <h2 id="languageTitle">Choose Your Typing Language</h2>
+      </header>
+
+      <div class="language-content">
+        <p class="language-subtitle">
+          Select the language you want to use for typing practice.
+        </p>
+
+        <div class="language-options">
+          <button class="language-option" id="chooseEnglishButton" type="button">
+            <span class="language-icon">A</span>
+            <strong>English</strong>
+            <small>English Typing</small>
+          </button>
+
+          <button class="language-option" id="chooseHindiButton" type="button">
+            <span class="language-icon">अ</span>
+            <strong>हिंदी</strong>
+            <small>हिंदी टाइपिंग</small>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Welcome Popup -->
+
+  <div
+    class="welcome-backdrop"
     id="welcomeModal"
     role="dialog"
     aria-modal="true"
@@ -943,7 +1073,7 @@
     <section class="welcome-card">
       <header class="welcome-header">
         <div>
-          <p class="welcome-label">WELCOME TO</p>
+          <p class="welcome-label" id="welcomeLabel">WELCOME TO</p>
           <h2 id="welcomeTitle">Typing Space</h2>
         </div>
 
@@ -958,57 +1088,45 @@
       </header>
 
       <div class="welcome-content">
-        <p class="welcome-intro">
-          Practice your English typing speed, check your writing, and view your typing result.
-        </p>
+        <p class="welcome-intro" id="welcomeIntro"></p>
 
         <div class="instruction-list">
           <div class="instruction-item">
             <span class="instruction-number">1</span>
             <div>
-              <h3>Start typing</h3>
-              <p>Tap inside the paper area and begin typing your English text.</p>
+              <h3 id="instruction1Title"></h3>
+              <p id="instruction1Text"></p>
             </div>
           </div>
 
           <div class="instruction-item">
             <span class="instruction-number">2</span>
             <div>
-              <h3>Timer starts automatically</h3>
-              <p>The timer begins when you type your first character.</p>
+              <h3 id="instruction2Title"></h3>
+              <p id="instruction2Text"></p>
             </div>
           </div>
 
           <div class="instruction-item">
             <span class="instruction-number">3</span>
             <div>
-              <h3>Finish your practice</h3>
-              <p>Click Finish Typing when you have completed your practice.</p>
+              <h3 id="instruction3Title"></h3>
+              <p id="instruction3Text"></p>
             </div>
           </div>
 
           <div class="instruction-item">
             <span class="instruction-number">4</span>
             <div>
-              <h3>View typing result</h3>
-              <p>See WPM, total words, characters, time taken, and writing suggestions.</p>
-            </div>
-          </div>
-
-          <div class="instruction-item">
-            <span class="instruction-number">5</span>
-            <div>
-              <h3>Restart any time</h3>
-              <p>Use Re-Start Typing to clear the written text and start again.</p>
+              <h3 id="instruction4Title"></h3>
+              <p id="instruction4Text"></p>
             </div>
           </div>
         </div>
 
         <div class="welcome-tip">
           <span>💡</span>
-          <p>
-            Grammar and spelling suggestions require an internet connection after finishing.
-          </p>
+          <p id="welcomeTipText"></p>
         </div>
       </div>
 
@@ -1025,9 +1143,12 @@
     const typingPaper = document.querySelector(".typing-paper");
     const typingError = document.getElementById("typingError");
 
+    const appTitle = document.getElementById("appTitle");
+    const languageSelect = document.getElementById("languageSelect");
+    const themeToggle = document.getElementById("themeToggle");
+
     const finishButton = document.getElementById("finishButton");
     const restartButton = document.getElementById("restartButton");
-
     const timerElement = document.getElementById("timer");
 
     const resultModal = document.getElementById("resultModal");
@@ -1035,22 +1156,138 @@
     const tryAgainButton = document.getElementById("tryAgainButton");
     const closePracticeButton = document.getElementById("closePracticeButton");
 
+    const resultTitle = document.getElementById("resultTitle");
+    const speedLabel = document.getElementById("speedLabel");
+    const timeLabel = document.getElementById("timeLabel");
+    const wordsLabel = document.getElementById("wordsLabel");
+    const charactersLabel = document.getElementById("charactersLabel");
+    const writingCheckTitle = document.getElementById("writingCheckTitle");
+    const writingCheckNote = document.getElementById("writingCheckNote");
+
     const wpmResult = document.getElementById("wpmResult");
     const timeResult = document.getElementById("timeResult");
     const wordsResult = document.getElementById("wordsResult");
     const charactersResult = document.getElementById("charactersResult");
     const analysisResult = document.getElementById("analysisResult");
 
-    const themeToggle = document.getElementById("themeToggle");
+    const languageModal = document.getElementById("languageModal");
+    const chooseEnglishButton = document.getElementById("chooseEnglishButton");
+    const chooseHindiButton = document.getElementById("chooseHindiButton");
 
     const welcomeModal = document.getElementById("welcomeModal");
-    const startTypingButton = document.getElementById("startTypingButton");
     const welcomeCloseButton = document.getElementById("welcomeCloseButton");
+    const startTypingButton = document.getElementById("startTypingButton");
 
+    const welcomeLabel = document.getElementById("welcomeLabel");
+    const welcomeTitle = document.getElementById("welcomeTitle");
+    const welcomeIntro = document.getElementById("welcomeIntro");
+    const instruction1Title = document.getElementById("instruction1Title");
+    const instruction1Text = document.getElementById("instruction1Text");
+    const instruction2Title = document.getElementById("instruction2Title");
+    const instruction2Text = document.getElementById("instruction2Text");
+    const instruction3Title = document.getElementById("instruction3Title");
+    const instruction3Text = document.getElementById("instruction3Text");
+    const instruction4Title = document.getElementById("instruction4Title");
+    const instruction4Text = document.getElementById("instruction4Text");
+    const welcomeTipText = document.getElementById("welcomeTipText");
+
+    let selectedLanguage = "en";
     let startedAt = null;
     let elapsedSeconds = 0;
     let timerInterval = null;
     let practiceFinished = false;
+
+    const languageText = {
+      en: {
+        documentLanguage: "en",
+        title: "Typing Space",
+        placeholder: "Start typing here in English...",
+        restartButton: "Re-Start Typing",
+        finishButton: "Finish Typing",
+
+        resultTitle: "Typing Result",
+        speed: "Speed",
+        timeTaken: "Time Taken",
+        totalWords: "Total Words",
+        characters: "Characters",
+        writingCheck: "English Writing Check",
+        writingNote: "Spelling and grammar suggestions are checked after you finish typing.",
+        tryAgain: "Try Again",
+        close: "Close",
+
+        emptyError: "Please type some English text before finishing your typing practice.",
+        invalidLanguageError: "Please type only English text. Hindi or another language was detected.",
+
+        welcomeLabel: "WELCOME TO",
+        welcomeTitle: "English Typing Space",
+        welcomeIntro: "Practice your English typing speed, check your writing, and view your result.",
+        instruction1Title: "Start typing",
+        instruction1Text: "Tap inside the paper area and type your English text.",
+        instruction2Title: "Timer starts automatically",
+        instruction2Text: "The timer begins when you type your first character.",
+        instruction3Title: "Finish your practice",
+        instruction3Text: "Click Finish Typing after completing your practice.",
+        instruction4Title: "View your result",
+        instruction4Text: "See WPM, time, words, characters, and writing suggestions.",
+        tip: "Grammar and spelling suggestions require an internet connection after finishing.",
+        startTyping: "Start Typing",
+
+        checking: "Checking English spelling and grammar...",
+        noErrors: "Great work — no spelling or grammar suggestions were found.",
+        serviceError: "Your typing result is ready, but the grammar checking service could not be reached. Please check your internet connection.",
+        writingIssue: "Writing issue",
+        suggestion: "Suggestion",
+        noSuggestion: "No replacement suggested",
+        showing: "Showing the first 10 of"
+      },
+
+      hi: {
+        documentLanguage: "hi",
+        title: "हिंदी टाइपिंग स्पेस",
+        placeholder: "यहाँ हिंदी में टाइप करना शुरू करें...",
+        restartButton: "फिर से शुरू करें",
+        finishButton: "टाइपिंग समाप्त करें",
+
+        resultTitle: "टाइपिंग परिणाम",
+        speed: "टाइपिंग स्पीड",
+        timeTaken: "लगा समय",
+        totalWords: "कुल शब्द",
+        characters: "कुल अक्षर",
+        writingCheck: "हिंदी लेखन जाँच",
+        writingNote: "टाइपिंग समाप्त होने के बाद वर्तनी और व्याकरण के सुझाव देखे जाएंगे।",
+        tryAgain: "फिर से प्रयास करें",
+        close: "बंद करें",
+
+        emptyError: "टाइपिंग समाप्त करने से पहले कृपया कुछ हिंदी टेक्स्ट टाइप करें।",
+        invalidLanguageError: "कृपया केवल हिंदी में टाइप करें। अंग्रेज़ी या दूसरी भाषा का टेक्स्ट मिला है।",
+
+        welcomeLabel: "आपका स्वागत है",
+        welcomeTitle: "हिंदी टाइपिंग स्पेस",
+        welcomeIntro: "अपनी हिंदी टाइपिंग स्पीड का अभ्यास करें, लेखन जाँचें और अपना परिणाम देखें।",
+        instruction1Title: "टाइपिंग शुरू करें",
+        instruction1Text: "पेपर वाले क्षेत्र पर टैप करें और हिंदी में लिखना शुरू करें।",
+        instruction2Title: "टाइमर अपने आप शुरू होगा",
+        instruction2Text: "पहला अक्षर टाइप करते ही टाइमर चलना शुरू हो जाएगा।",
+        instruction3Title: "टाइपिंग समाप्त करें",
+        instruction3Text: "अभ्यास पूरा होने पर टाइपिंग समाप्त करें बटन दबाएँ।",
+        instruction4Title: "अपना परिणाम देखें",
+        instruction4Text: "WPM, शब्द, अक्षर, समय और लेखन सुझाव देखें।",
+        tip: "वर्तनी और व्याकरण की जाँच के लिए इंटरनेट कनेक्शन आवश्यक है।",
+        startTyping: "टाइपिंग शुरू करें",
+
+        checking: "हिंदी वर्तनी और व्याकरण की जाँच की जा रही है...",
+        noErrors: "बहुत अच्छा! कोई वर्तनी या व्याकरण संबंधी सुझाव नहीं मिला।",
+        serviceError: "टाइपिंग परिणाम तैयार है, लेकिन हिंदी वर्तनी और व्याकरण जाँच सेवा उपलब्ध नहीं है। कृपया इंटरनेट कनेक्शन जाँचें।",
+        writingIssue: "लेखन संबंधी समस्या",
+        suggestion: "सुझाव",
+        noSuggestion: "कोई सुझाव उपलब्ध नहीं है",
+        showing: "कुल सुझावों में से पहले 10 सुझाव दिखाए जा रहे हैं।"
+      }
+    };
+
+    function getCurrentText() {
+      return languageText[selectedLanguage];
+    }
 
     function formatTime(totalSeconds) {
       const minutes = Math.floor(totalSeconds / 60);
@@ -1078,7 +1315,6 @@
       }
 
       startedAt = Date.now();
-
       updateTimer();
 
       timerInterval = setInterval(updateTimer, 1000);
@@ -1120,7 +1356,7 @@
       typingPaper.classList.remove("has-error");
     }
 
-    function restartTyping() {
+    function resetPractice() {
       stopTimer();
 
       startedAt = null;
@@ -1135,6 +1371,10 @@
       clearTypingError();
 
       resultModal.classList.remove("show");
+    }
+
+    function restartTyping() {
+      resetPractice();
 
       setTimeout(() => {
         typingArea.focus();
@@ -1145,6 +1385,65 @@
       restartTyping();
     }
 
+    function updateInterfaceLanguage() {
+      const text = getCurrentText();
+
+      document.documentElement.lang = text.documentLanguage;
+      document.title = text.title;
+
+      appTitle.textContent = text.title;
+
+      typingArea.lang = text.documentLanguage;
+      typingArea.placeholder = text.placeholder;
+      typingArea.setAttribute("aria-label", text.placeholder);
+
+      restartButton.textContent = text.restartButton;
+      finishButton.textContent = text.finishButton;
+
+      resultTitle.textContent = text.resultTitle;
+      speedLabel.textContent = text.speed;
+      timeLabel.textContent = text.timeTaken;
+      wordsLabel.textContent = text.totalWords;
+      charactersLabel.textContent = text.characters;
+      writingCheckTitle.textContent = text.writingCheck;
+      writingCheckNote.textContent = text.writingNote;
+      tryAgainButton.textContent = text.tryAgain;
+      closePracticeButton.textContent = text.close;
+
+      welcomeLabel.textContent = text.welcomeLabel;
+      welcomeTitle.textContent = text.welcomeTitle;
+      welcomeIntro.textContent = text.welcomeIntro;
+
+      instruction1Title.textContent = text.instruction1Title;
+      instruction1Text.textContent = text.instruction1Text;
+
+      instruction2Title.textContent = text.instruction2Title;
+      instruction2Text.textContent = text.instruction2Text;
+
+      instruction3Title.textContent = text.instruction3Title;
+      instruction3Text.textContent = text.instruction3Text;
+
+      instruction4Title.textContent = text.instruction4Title;
+      instruction4Text.textContent = text.instruction4Text;
+
+      welcomeTipText.textContent = text.tip;
+      startTypingButton.textContent = text.startTyping;
+
+      languageSelect.value = selectedLanguage;
+    }
+
+    function selectLanguage(language, showWelcome = false) {
+      selectedLanguage = language;
+
+      updateInterfaceLanguage();
+      resetPractice();
+
+      if (showWelcome) {
+        languageModal.classList.remove("show");
+        welcomeModal.classList.add("show");
+      }
+    }
+
     function closeWelcomeModal() {
       welcomeModal.classList.remove("show");
 
@@ -1153,18 +1452,50 @@
       }, 100);
     }
 
+    function isValidSelectedLanguage(text) {
+  const cleanText = text.trim();
+
+  if (!cleanText) {
+    return false;
+  }
+
+  const hasEnglishLetters = /[A-Za-z]/.test(cleanText);
+  const hasEnglishNumbers = /[0-9]/.test(cleanText);
+  const hasHindiLetters = /[\u0900-\u097F]/.test(cleanText);
+
+  if (selectedLanguage === "en") {
+    return (
+      (hasEnglishLetters || hasEnglishNumbers) &&
+      !hasHindiLetters
+    );
+  }
+
+  if (selectedLanguage === "hi") {
+    return (
+      (hasHindiLetters || hasEnglishNumbers) &&
+      !hasEnglishLetters
+    );
+  }
+
+  return false;
+}
+
     function finishPractice() {
       if (practiceFinished) {
         return;
       }
 
       const typedText = typingArea.value.trim();
+      const text = getCurrentText();
 
       if (!typedText) {
-        showTypingError(
-          "Please type some text before finishing your typing practice."
-        );
+        showTypingError(text.emptyError);
+        typingArea.focus();
+        return;
+      }
 
+      if (!isValidSelectedLanguage(typedText)) {
+        showTypingError(text.invalidLanguageError);
         typingArea.focus();
         return;
       }
@@ -1201,11 +1532,15 @@
     }
 
     async function checkGrammarAndSpelling(text) {
+      const currentText = getCurrentText();
+
       analysisResult.innerHTML = `
         <div class="checking-message">
-          Checking spelling and grammar...
+          ${escapeHTML(currentText.checking)}
         </div>
       `;
+
+      const languageCode = selectedLanguage === "hi" ? "hi-IN" : "en-US";
 
       try {
         const response = await fetch(
@@ -1217,13 +1552,13 @@
             },
             body: new URLSearchParams({
               text: text,
-              language: "en-US"
+              language: languageCode
             })
           }
         );
 
         if (!response.ok) {
-          throw new Error("Grammar service is unavailable.");
+          throw new Error("Grammar service unavailable.");
         }
 
         const data = await response.json();
@@ -1232,7 +1567,7 @@
         if (issues.length === 0) {
           analysisResult.innerHTML = `
             <div class="no-errors">
-              Great work — no spelling or grammar suggestions were found.
+              ${escapeHTML(currentText.noErrors)}
             </div>
           `;
           return;
@@ -1250,39 +1585,31 @@
             const suggestion =
               issue.replacements && issue.replacements.length > 0
                 ? issue.replacements[0].value
-                : "No replacement suggested";
+                : currentText.noSuggestion;
 
             return `
               <li class="error-item">
-                <strong>${escapeHTML(originalText || "Writing issue")}:</strong>
+                <strong>
+                  ${escapeHTML(originalText || currentText.writingIssue)}:
+                </strong>
                 ${escapeHTML(issue.message)}
                 <br>
-                Suggestion: ${escapeHTML(suggestion)}
+                ${escapeHTML(currentText.suggestion)}:
+                ${escapeHTML(suggestion)}
               </li>
             `;
           })
           .join("");
 
-        const remainingIssuesMessage =
-          issues.length > 10
-            ? `
-              <p class="analysis-note">
-                Showing the first 10 of ${issues.length} suggestions.
-              </p>
-            `
-            : "";
-
         analysisResult.innerHTML = `
           <ul class="error-list">
             ${issuesHTML}
           </ul>
-          ${remainingIssuesMessage}
         `;
       } catch (error) {
         analysisResult.innerHTML = `
           <div class="checking-message">
-            Your typing result is ready, but the spelling and grammar service
-            could not be reached. Please check your internet connection.
+            ${escapeHTML(currentText.serviceError)}
           </div>
         `;
       }
@@ -1292,14 +1619,13 @@
       const isDarkTheme = theme === "dark";
 
       document.body.classList.toggle("dark-theme", isDarkTheme);
-
       themeToggle.checked = isDarkTheme;
 
-      localStorage.setItem("typespace-theme", theme);
+      localStorage.setItem("combined-typing-space-theme", theme);
     }
 
     function loadTheme() {
-      const savedTheme = localStorage.getItem("typespace-theme");
+      const savedTheme = localStorage.getItem("combined-typing-space-theme");
 
       if (savedTheme === "dark" || savedTheme === "light") {
         setTheme(savedTheme);
@@ -1328,9 +1654,25 @@
 
     closePracticeButton.addEventListener("click", closePractice);
 
+    chooseEnglishButton.addEventListener("click", () => {
+      selectLanguage("en", true);
+    });
+
+    chooseHindiButton.addEventListener("click", () => {
+      selectLanguage("hi", true);
+    });
+
     startTypingButton.addEventListener("click", closeWelcomeModal);
 
     welcomeCloseButton.addEventListener("click", closeWelcomeModal);
+
+    languageSelect.addEventListener("change", () => {
+      selectLanguage(languageSelect.value, false);
+
+      setTimeout(() => {
+        typingArea.focus();
+      }, 100);
+    });
 
     resultModal.addEventListener("click", (event) => {
       if (event.target === resultModal) {
@@ -1349,6 +1691,10 @@
         return;
       }
 
+      if (languageModal.classList.contains("show")) {
+        return;
+      }
+
       if (welcomeModal.classList.contains("show")) {
         closeWelcomeModal();
         return;
@@ -1363,6 +1709,7 @@
       setTheme(themeToggle.checked ? "dark" : "light");
     });
 
+    updateInterfaceLanguage();
     loadTheme();
   </script>
 </body>
