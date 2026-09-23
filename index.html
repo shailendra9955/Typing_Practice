@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
   />
-  <title>TypeSpace — Typing Practice</title>
+
+  <title>Typing Space — Typing Practice</title>
 
   <style>
     :root {
@@ -19,6 +21,19 @@
       --danger: #d83a4d;
       --border: #dbe2ec;
       --shadow: 0 12px 34px rgba(24, 42, 72, 0.13);
+      --line-color: #e6ebf3;
+      --card-bg: #ffffff;
+      --card-content-bg: #ffffff;
+      --secondary-bg: #ffffff;
+      --secondary-hover: #f4f7fb;
+      --stat-bg: #f8faff;
+      --info-bg: #f0f4fa;
+      --info-text: #526175;
+      --success-bg: #edf7f0;
+      --success-text: #277744;
+      --error-bg: #fff3f4;
+      --error-text: #4a252b;
+      --modal-overlay: rgba(16, 28, 47, 0.62);
       --line-height: 1.9rem;
     }
 
@@ -33,10 +48,12 @@
     }
 
     body {
+      overflow-x: hidden;
       background: var(--bg);
       color: var(--ink);
       font-family: Arial, Helvetica, sans-serif;
       -webkit-tap-highlight-color: transparent;
+      transition: background 0.25s ease, color 0.25s ease;
     }
 
     button,
@@ -50,6 +67,10 @@
       touch-action: manipulation;
     }
 
+    button:active {
+      transform: scale(0.98);
+    }
+
     .app {
       width: min(100%, 960px);
       min-height: 100dvh;
@@ -60,6 +81,8 @@
       gap: 14px;
     }
 
+    /* Header */
+
     .topbar {
       display: flex;
       align-items: center;
@@ -69,32 +92,98 @@
 
     .brand {
       margin: 0;
-      font-size: 1.1rem;
-      letter-spacing: 0.2px;
+      color: var(--ink);
+      font-size: 1.15rem;
       font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .timer-box {
-      min-width: 88px;
+      min-width: 84px;
       padding: 8px 12px;
       border: 1px solid var(--border);
       border-radius: 10px;
-      background: rgba(255, 255, 255, 0.8);
+      background: var(--paper);
       color: var(--primary);
       text-align: center;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
     }
 
+    /* Theme Toggle */
+
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .toggle input {
+      width: 0;
+      height: 0;
+      opacity: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      cursor: pointer;
+      border-radius: 50px;
+      background: #aeb8c5;
+      transition: 0.25s ease;
+    }
+
+    .slider::before {
+      content: "☀";
+      position: absolute;
+      left: 4px;
+      bottom: 4px;
+      display: grid;
+      width: 20px;
+      height: 20px;
+      place-items: center;
+      border-radius: 50%;
+      background: #ffffff;
+      color: #e49a00;
+      font-size: 0.75rem;
+      transition: 0.25s ease;
+    }
+
+    .toggle input:checked + .slider {
+      background: var(--primary);
+    }
+
+    .toggle input:checked + .slider::before {
+      content: "☾";
+      transform: translateX(24px);
+      color: #42526a;
+    }
+
+    .toggle input:focus-visible + .slider {
+      outline: 3px solid rgba(23, 105, 224, 0.35);
+      outline-offset: 3px;
+    }
+
+    /* Typing Area */
+
     .typing-paper {
       position: relative;
       flex: 1;
       min-height: 0;
       overflow: hidden;
-      background-color: var(--paper);
+      background: var(--paper);
       border: 1px solid var(--border);
       border-radius: 14px;
       box-shadow: var(--shadow);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .typing-paper::before {
@@ -105,11 +194,16 @@
       background-image: linear-gradient(
         to bottom,
         transparent calc(var(--line-height) - 1px),
-        #e6ebf3 calc(var(--line-height) - 1px)
+        var(--line-color) calc(var(--line-height) - 1px)
       );
       background-size: 100% var(--line-height);
       background-position: 0 18px;
-      opacity: 0.88;
+      opacity: 0.9;
+    }
+
+    .typing-paper.has-error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(216, 58, 77, 0.15);
     }
 
     #typingArea {
@@ -137,49 +231,62 @@
       opacity: 1;
     }
 
+    #typingArea:disabled {
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+
+    .typing-error {
+      display: none;
+      margin: -4px 2px 0;
+      color: var(--danger);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .typing-error.show {
+      display: block;
+    }
+
+    /* Main Action Buttons */
+
     .bottom-actions {
-	display: flex;
-	gap: 10px;
-	}
+      display: flex;
+      gap: 12px;
+    }
 
-	.finish-button,
-	.restart-button {
-		flex: 1;
-		min-height: 52px;
-		padding: 12px 14px;
-		border-radius: 12px;
-		font-size: 1rem;
-		font-weight: 700;
-		}
+    .finish-button,
+    .restart-button {
+      flex: 1;
+      min-height: 52px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
 
-	.finish-button {
-		background: var(--primary);
-		color: #fff;
-		box-shadow: 0 7px 16px rgba(23, 105, 224, 0.25);
-		}
+    .finish-button {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 7px 16px rgba(23, 105, 224, 0.25);
+    }
 
-	.restart-button {
-		border: 1px solid var(--border);
-		background: #ffffff;
-		color: #3e4b5e;
-		}
+    .finish-button:hover {
+      background: var(--primary-dark);
+    }
 
-	.finish-button:active,
-	.restart-button:active,
-	.primary-button:active {
-		transform: scale(0.98);
-		}
+    .restart-button {
+      background: #f5364c;
+      color: #ffffff;
+    }
 
-	.finish-button:hover,
-	.primary-button:hover {
-		background: var(--primary-dark);
-		}
+    .restart-button:hover {
+      background: #e51f36;
+    }
 
-	.restart-button:hover {
-		background: #f4f7fb;
-		}
+    /* Result Modal */
 
-    /* Result Popup */
     .modal-backdrop {
       position: fixed;
       z-index: 10;
@@ -187,8 +294,8 @@
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 16px;
-      background: rgba(16, 28, 47, 0.62);
+      padding: 12px;
+      background: var(--modal-overlay);
     }
 
     .modal-backdrop.show {
@@ -196,12 +303,16 @@
     }
 
     .result-card {
-      width: min(100%, 620px);
-      max-height: min(86dvh, 760px);
-      overflow-y: auto;
-      border-radius: 18px;
-      background: #fff;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      width: min(92vw, 460px);
+      max-height: calc(100dvh - 24px);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card-bg);
+      color: var(--ink);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
       animation: popup 180ms ease-out;
     }
 
@@ -219,29 +330,41 @@
 
     .result-header {
       display: flex;
+      flex-shrink: 0;
       align-items: center;
       justify-content: space-between;
-      padding: 18px 18px 12px;
+      padding: 14px 14px 10px;
       border-bottom: 1px solid var(--border);
+      background: var(--card-bg);
     }
 
     .result-header h2 {
       margin: 0;
-      font-size: 1.2rem;
+      font-size: 1.05rem;
     }
 
     .icon-close {
-      width: 38px;
-      height: 38px;
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
       border-radius: 50%;
-      background: #eef2f7;
-      color: #4d5869;
+      background: var(--secondary-bg);
+      color: var(--ink);
       font-size: 1.4rem;
       line-height: 1;
     }
 
+    .icon-close:hover {
+      background: var(--secondary-hover);
+    }
+
     .result-content {
-      padding: 18px;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 14px;
+      background: var(--card-content-bg);
+      -webkit-overflow-scrolling: touch;
     }
 
     .stats-grid {
@@ -251,55 +374,56 @@
     }
 
     .stat {
-      padding: 14px 12px;
+      padding: 10px;
       border: 1px solid var(--border);
-      border-radius: 12px;
-      background: #f8faff;
+      border-radius: 10px;
+      background: var(--stat-bg);
     }
 
     .stat-label {
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       color: var(--muted);
-      font-size: 0.78rem;
-      font-weight: 600;
+      font-size: 0.68rem;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.45px;
     }
 
     .stat-value {
-      font-size: 1.25rem;
+      font-size: 1.05rem;
       font-weight: 700;
     }
 
     .analysis-section {
-      margin-top: 18px;
+      margin-top: 16px;
     }
 
     .analysis-section h3 {
       margin: 0 0 8px;
-      font-size: 1rem;
+      font-size: 0.98rem;
     }
 
     .analysis-note {
       margin: 0 0 10px;
       color: var(--muted);
-      font-size: 0.87rem;
+      font-size: 0.84rem;
       line-height: 1.45;
     }
 
     .checking-message,
     .no-errors {
-      padding: 12px;
+      padding: 11px;
       border-radius: 10px;
-      background: #edf7f0;
-      color: #277744;
-      font-size: 0.92rem;
+      background: var(--info-bg);
+      color: var(--info-text);
+      font-size: 0.88rem;
+      line-height: 1.45;
     }
 
-    .checking-message {
-      background: #f0f4fa;
-      color: #526175;
+    .no-errors {
+      background: var(--success-bg);
+      color: var(--success-text);
     }
 
     .error-list {
@@ -311,13 +435,14 @@
     }
 
     .error-item {
-      padding: 11px 12px;
+      padding: 10px 11px;
       border-left: 4px solid var(--danger);
       border-radius: 8px;
-      background: #fff3f4;
-      color: #4a252b;
-      font-size: 0.9rem;
+      background: var(--error-bg);
+      color: var(--error-text);
+      font-size: 0.87rem;
       line-height: 1.4;
+      overflow-wrap: anywhere;
     }
 
     .error-item strong {
@@ -326,33 +451,91 @@
 
     .result-actions {
       display: grid;
+      flex-shrink: 0;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      padding: 0 18px 18px;
+      gap: 8px;
+      padding: 10px 14px 14px;
+      border-top: 1px solid var(--border);
+      background: var(--card-bg);
     }
 
     .primary-button,
     .secondary-button {
-      min-height: 48px;
-      padding: 10px 14px;
+      min-height: 46px;
+      padding: 10px 12px;
       border-radius: 10px;
+      font-size: 0.92rem;
       font-weight: 700;
     }
 
     .primary-button {
       background: var(--primary);
-      color: white;
+      color: #ffffff;
+    }
+
+    .primary-button:hover {
+      background: var(--primary-dark);
     }
 
     .secondary-button {
       border: 1px solid var(--border);
-      background: #fff;
-      color: #3e4b5e;
+      background: var(--secondary-bg);
+      color: var(--ink);
     }
 
     .secondary-button:hover {
-      background: #f4f7fb;
+      background: var(--secondary-hover);
     }
+
+    /* Dark Theme */
+
+    body.dark-theme {
+      --bg: #101720;
+      --paper: #18212c;
+      --ink: #edf3fa;
+      --muted: #a9b6c5;
+      --primary: #66a2ff;
+      --primary-dark: #3f82e7;
+      --danger: #ff7180;
+      --border: #354557;
+      --shadow: 0 12px 34px rgba(0, 0, 0, 0.4);
+      --line-color: #304052;
+
+      --card-bg: #18212c;
+      --card-content-bg: #1d2835;
+      --secondary-bg: #29394a;
+      --secondary-hover: #35485d;
+      --stat-bg: #263546;
+
+      --info-bg: #263546;
+      --info-text: #d2deeb;
+
+      --success-bg: #1c4935;
+      --success-text: #b9f0cd;
+
+      --error-bg: #4a2a32;
+      --error-text: #ffe2e5;
+
+      --modal-overlay: rgba(3, 8, 14, 0.76);
+    }
+
+    body.dark-theme #typingArea::placeholder {
+      color: #91a0b2;
+    }
+
+    body.dark-theme .restart-button {
+      background: #d9465b;
+    }
+
+    body.dark-theme .restart-button:hover {
+      background: #c93249;
+    }
+
+    body.dark-theme .toggle input:checked + .slider::before {
+      color: #263546;
+    }
+
+    /* Small Android Screens */
 
     @media (max-width: 480px) {
       :root {
@@ -364,65 +547,110 @@
         gap: 10px;
       }
 
+      .brand {
+        font-size: 1rem;
+      }
+
+      .topbar-right {
+        gap: 8px;
+      }
+
+      .timer-box {
+        min-width: 72px;
+        padding: 7px 9px;
+        font-size: 0.9rem;
+      }
+
       .typing-paper {
         border-radius: 12px;
       }
 
       #typingArea {
-        min-height: calc(100dvh - 166px);
+        min-height: calc(100dvh - 165px);
         padding: 14px 14px 20px;
         font-size: 1rem;
       }
 
+      .bottom-actions {
+        gap: 8px;
+      }
+
+      .finish-button,
+      .restart-button {
+        min-height: 50px;
+        padding: 10px 8px;
+        font-size: 0.88rem;
+      }
+
+      .modal-backdrop {
+        align-items: center;
+        padding: 10px;
+      }
+
       .result-card {
-        max-height: 90dvh;
-        border-radius: 16px;
+        width: min(94vw, 390px);
+        max-height: calc(100dvh - 20px);
+        border-radius: 14px;
+      }
+
+      .result-header {
+        padding: 12px 12px 9px;
+      }
+
+      .result-header h2 {
+        font-size: 1rem;
       }
 
       .result-content {
-        padding: 14px;
+        padding: 12px;
+      }
+
+      .stats-grid {
+        gap: 8px;
+      }
+
+      .stat {
+        padding: 9px;
+      }
+
+      .stat-value {
+        font-size: 1rem;
+      }
+
+      .analysis-section {
+        margin-top: 14px;
       }
 
       .result-actions {
-        padding: 0 14px 14px;
+        gap: 8px;
+        padding: 9px 12px 12px;
       }
-	  
-	  .bottom-actions {
-			gap: 8px;
-			}
 
-	.finish-button,
-	.restart-button {
-		min-height: 50px;
-		padding: 10px 8px;
-		font-size: 0.9rem;
-		}
+      .primary-button,
+      .secondary-button {
+        min-height: 44px;
+        padding: 9px 8px;
+        font-size: 0.86rem;
+      }
     }
-	
-	.typing-error {
-		display: none;
-		margin: -4px 2px 0;
-		color: #c22639;
-		font-size: 0.9rem;
-		font-weight: 600;
-	}
-		
-	.typing-error.show {
-		display: block;
-	}
-		
-	.typing-paper.has-error {
-		border-color: #d83a4d;
-		box-shadow: 0 0 0 3px rgba(216, 58, 77, 0.15);
-	}
   </style>
 </head>
 
 <body>
   <main class="app">
     <header class="topbar">
-      <h1 class="brand">TypeSpace</h1>
-      <div class="timer-box" id="timer" aria-live="polite">00:00</div>
+      <h1 class="brand">Typing Space</h1>
+
+      <div class="topbar-right">
+        <label class="toggle" aria-label="Toggle light and dark mode">
+          <input type="checkbox" id="themeToggle" />
+          <span class="slider"></span>
+        </label>
+
+        <div class="timer-box" id="timer" aria-live="polite">
+          00:00
+        </div>
+      </div>
     </header>
 
     <section class="typing-paper" aria-label="Typing practice paper">
@@ -435,14 +663,21 @@
         autocapitalize="sentences"
       ></textarea>
     </section>
-	<p id="typingError" class="typing-error" role="alert" aria-live="polite"></p>
+
+    <p
+      id="typingError"
+      class="typing-error"
+      role="alert"
+      aria-live="polite"
+    ></p>
 
     <div class="bottom-actions">
+      <button class="restart-button" id="restartButton" type="button">
+        Re-Start Typing
+      </button>
+
       <button class="finish-button" id="finishButton" type="button">
         Finish Typing
-      </button>
-	  <button class="restart-button" id="restartButton" type="button">
-        Re-Start
       </button>
     </div>
   </main>
@@ -457,6 +692,7 @@
     <section class="result-card">
       <header class="result-header">
         <h2 id="resultTitle">Typing Result</h2>
+
         <button
           class="icon-close"
           id="modalCloseButton"
@@ -492,9 +728,11 @@
 
         <section class="analysis-section">
           <h3>English Writing Check</h3>
+
           <p class="analysis-note">
             Spelling and grammar suggestions are checked after you finish typing.
           </p>
+
           <div id="analysisResult" class="checking-message">
             Preparing analysis...
           </div>
@@ -505,6 +743,7 @@
         <button class="primary-button" id="tryAgainButton" type="button">
           Try Again
         </button>
+
         <button class="secondary-button" id="closePracticeButton" type="button">
           Close
         </button>
@@ -514,11 +753,14 @@
 
   <script>
     const typingArea = document.getElementById("typingArea");
+    const typingPaper = document.querySelector(".typing-paper");
+    const typingError = document.getElementById("typingError");
+
     const finishButton = document.getElementById("finishButton");
-	const restartButton = document.getElementById("restartButton");
-	const typingError = document.getElementById("typingError");
-	const typingPaper = document.querySelector(".typing-paper");
+    const restartButton = document.getElementById("restartButton");
+
     const timerElement = document.getElementById("timer");
+
     const resultModal = document.getElementById("resultModal");
     const modalCloseButton = document.getElementById("modalCloseButton");
     const tryAgainButton = document.getElementById("tryAgainButton");
@@ -529,6 +771,8 @@
     const wordsResult = document.getElementById("wordsResult");
     const charactersResult = document.getElementById("charactersResult");
     const analysisResult = document.getElementById("analysisResult");
+
+    const themeToggle = document.getElementById("themeToggle");
 
     let startedAt = null;
     let elapsedSeconds = 0;
@@ -543,7 +787,9 @@
     }
 
     function updateTimer() {
-      if (!startedAt) return;
+      if (!startedAt) {
+        return;
+      }
 
       elapsedSeconds = Math.max(
         1,
@@ -554,7 +800,9 @@
     }
 
     function startTimer() {
-      if (startedAt || practiceFinished) return;
+      if (startedAt || practiceFinished) {
+        return;
+      }
 
       startedAt = Date.now();
       updateTimer();
@@ -570,16 +818,15 @@
     function countWords(text) {
       const cleanText = text.trim();
 
-      if (!cleanText) return 0;
+      if (!cleanText) {
+        return 0;
+      }
 
       return cleanText.split(/\s+/).filter(Boolean).length;
     }
-	
 
     function escapeHTML(value) {
-      const safeValue = String(value);
-
-      return safeValue
+      return String(value)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -587,16 +834,90 @@
         .replaceAll("'", "&#039;");
     }
 
-    async function checkGrammarAndSpelling(text) {
-      if (!text.trim()) {
-        analysisResult.innerHTML = `
-          <div class="no-errors">
-            No text was entered, so there is nothing to check.
-          </div>
-        `;
+    function showTypingError(message) {
+      typingError.textContent = message;
+      typingError.classList.add("show");
+      typingPaper.classList.add("has-error");
+    }
+
+    function clearTypingError() {
+      typingError.textContent = "";
+      typingError.classList.remove("show");
+      typingPaper.classList.remove("has-error");
+    }
+
+    function restartTyping() {
+      stopTimer();
+
+      startedAt = null;
+      elapsedSeconds = 0;
+      practiceFinished = false;
+
+      typingArea.value = "";
+      typingArea.disabled = false;
+      timerElement.textContent = "00:00";
+
+      clearTypingError();
+
+      resultModal.classList.remove("show");
+
+      setTimeout(() => {
+        typingArea.focus();
+      }, 100);
+    }
+
+    function closePractice() {
+      restartTyping();
+    }
+
+    function finishPractice() {
+      if (practiceFinished) {
         return;
       }
 
+      const typedText = typingArea.value.trim();
+
+      if (!typedText) {
+        showTypingError(
+          "Please type some text before finishing your typing practice."
+        );
+
+        typingArea.focus();
+        return;
+      }
+
+      clearTypingError();
+
+      if (startedAt) {
+        updateTimer();
+      } else {
+        elapsedSeconds = 0;
+      }
+
+      stopTimer();
+
+      practiceFinished = true;
+      typingArea.disabled = true;
+
+      const totalWords = countWords(typedText);
+      const totalMinutes = elapsedSeconds / 60;
+
+      const wpm =
+        totalMinutes > 0
+          ? Math.round(totalWords / totalMinutes)
+          : 0;
+
+      wpmResult.textContent = `${wpm} WPM`;
+      timeResult.textContent = formatTime(elapsedSeconds);
+      wordsResult.textContent = totalWords;
+      charactersResult.textContent = typedText.length;
+
+      resultModal.classList.add("show");
+
+      checkGrammarAndSpelling(typedText);
+    }
+
+    async function checkGrammarAndSpelling(text) {
       analysisResult.innerHTML = `
         <div class="checking-message">
           Checking spelling and grammar...
@@ -634,16 +955,16 @@
           return;
         }
 
-        const displayedIssues = issues.slice(0, 10);
+        const firstTenIssues = issues.slice(0, 10);
 
-        const issueItems = displayedIssues
+        const issuesHTML = firstTenIssues
           .map((issue) => {
             const originalText = text.substring(
               issue.offset,
               issue.offset + issue.length
             );
 
-            const replacement =
+            const suggestion =
               issue.replacements && issue.replacements.length > 0
                 ? issue.replacements[0].value
                 : "No replacement suggested";
@@ -652,137 +973,71 @@
               <li class="error-item">
                 <strong>${escapeHTML(originalText || "Writing issue")}:</strong>
                 ${escapeHTML(issue.message)}
-                <br />
-                Suggestion: ${escapeHTML(replacement)}
+                <br>
+                Suggestion: ${escapeHTML(suggestion)}
               </li>
             `;
           })
           .join("");
 
-        const additionalText =
+        const remainingIssuesMessage =
           issues.length > 10
-            ? `<p class="analysis-note">Showing the first 10 of ${issues.length} suggestions.</p>`
+            ? `
+              <p class="analysis-note">
+                Showing the first 10 of ${issues.length} suggestions.
+              </p>
+            `
             : "";
 
         analysisResult.innerHTML = `
           <ul class="error-list">
-            ${issueItems}
+            ${issuesHTML}
           </ul>
-          ${additionalText}
+          ${remainingIssuesMessage}
         `;
       } catch (error) {
         analysisResult.innerHTML = `
           <div class="checking-message">
-            Your typing result is ready, but the spelling and grammar service could not be reached.
-            Check your internet connection and try again.
+            Your typing result is ready, but the spelling and grammar service
+            could not be reached. Please check your internet connection.
           </div>
         `;
       }
     }
-	
-	function showTypingError(message) {
-  typingError.textContent = message;
-  typingError.classList.add("show");
-  typingPaper.classList.add("has-error");
-}
 
-function clearTypingError() {
-  typingError.textContent = "";
-  typingError.classList.remove("show");
-  typingPaper.classList.remove("has-error");
-}
+    function setTheme(theme) {
+      const isDarkTheme = theme === "dark";
 
-    function finishPractice() {
-  if (practiceFinished) return;
+      document.body.classList.toggle("dark-theme", isDarkTheme);
+      themeToggle.checked = isDarkTheme;
 
-  const typedText = typingArea.value;
+      localStorage.setItem("typespace-theme", theme);
+    }
 
-  if (!typedText.trim()) {
-    showTypingError("Please type some text before finishing your typing practice.");
-    typingArea.focus();
-    return;
-  }
+    function loadTheme() {
+      const savedTheme = localStorage.getItem("typespace-theme");
 
-  clearTypingError();
-
-  const totalWords = countWords(typedText);
-
-      if (!startedAt) {
-        elapsedSeconds = 0;
-      } else {
-        updateTimer();
+      if (savedTheme === "dark" || savedTheme === "light") {
+        setTheme(savedTheme);
+        return;
       }
 
-      stopTimer();
-      practiceFinished = true;
-      typingArea.disabled = true;
+      const devicePrefersDarkTheme = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
 
-      const minutes = elapsedSeconds / 60;
-      const wpm = minutes > 0 ? Math.round(totalWords / minutes) : 0;
-
-      wpmResult.textContent = `${wpm} WPM`;
-      timeResult.textContent = formatTime(elapsedSeconds);
-      wordsResult.textContent = totalWords;
-      charactersResult.textContent = typedText.length;
-
-      resultModal.classList.add("show");
-      checkGrammarAndSpelling(typedText);
-    }
-	
-	function restartTyping() {
-	stopTimer();
-
-		startedAt = null;
-		elapsedSeconds = 0;
-		practiceFinished = false;
-		
-		typingArea.value = "";
-		typingArea.disabled = false;
-		timerElement.textContent = "00:00";
-		
-		clearTypingError();
-		resultModal.classList.remove("show");
-		
-		setTimeout(() => {
-			typingArea.focus();
-		}, 100);
-	}
-
-    function resetPractice() {
-      stopTimer();
-
-      startedAt = null;
-      elapsedSeconds = 0;
-      practiceFinished = false;
-
-      timerElement.textContent = "00:00";
-      typingArea.value = "";
-      typingArea.disabled = false;
-      resultModal.classList.remove("show");
-
-      setTimeout(() => typingArea.focus(), 100);
-    }
-
-    function closePractice() {
-      resultModal.classList.remove("show");
-      typingArea.disabled = false;
-      practiceFinished = false;
-      stopTimer();
+      setTheme(devicePrefersDarkTheme ? "dark" : "light");
     }
 
     typingArea.addEventListener("input", () => {
-	clearTypingError();
-	startTimer();
-		});
+      clearTypingError();
+      startTimer();
+    });
 
     finishButton.addEventListener("click", finishPractice);
-	
-	restartButton.addEventListener("click", restartTyping);
-
-    tryAgainButton.addEventListener("click", resetPractice);
-
+    restartButton.addEventListener("click", restartTyping);
+    tryAgainButton.addEventListener("click", restartTyping);
     modalCloseButton.addEventListener("click", closePractice);
-
     closePracticeButton.addEventListener("click", closePractice);
 
     resultModal.addEventListener("click", (event) => {
@@ -796,6 +1051,12 @@ function clearTypingError() {
         closePractice();
       }
     });
+
+    themeToggle.addEventListener("change", () => {
+      setTheme(themeToggle.checked ? "dark" : "light");
+    });
+
+    loadTheme();
   </script>
 </body>
 </html>
